@@ -1,0 +1,17 @@
+Sandbox is a modern SwiftUI application built with the latest iOS development technologies.
+
+Features:
+• Modern SwiftUI interface
+• Network testing capabilities  
+• Biometric authentication support
+• Settings management
+• User profile functionality
+
+This app demonstrates modern iOS development patterns including:
+- SwiftUI architecture
+- Swift Package Manager integration
+- Harmonize architectural linting
+- Async/await networking
+- Modern logging and security
+
+Perfect for testing and exploring iOS app development concepts.

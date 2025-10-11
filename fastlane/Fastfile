@@ -1,0 +1,65 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+
+  lane :store_devices do
+    register_devices(
+      devices: {
+        ENV["REGISTER_DEVICE_NAME"] => ENV["REGISTER_DEVICE_ID"]
+      }
+    )
+  end
+
+  lane :signing_cer do
+    sync_code_signing(type: ENV["MATCH_OPERATION_TYPE"], app_identifier: ENV["APP_ID"])
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :testflight_upload do
+    match(type: "appstore", app_identifier: ENV["APP_ID"])
+    
+    # Build archive with iOS 17.0 target (Xcode 16.2 compatible)
+    sh("xcodebuild clean archive " +
+       "-project '../AidOn Sandbox.xcodeproj' " +
+       "-scheme 'App #{ENV["XCODE_ENVIRONMENT_NAME"]}' " +
+       "-configuration '#{ENV["XCODE_ENVIRONMENT_NAME"]} Release' " +
+       "-archivePath '../build/AidOnSandbox.xcarchive' " +
+       "-sdk iphoneos " +
+       "IPHONEOS_DEPLOYMENT_TARGET=16.0")
+    
+    # Export IPA
+    sh("xcodebuild -exportArchive " +
+       "-archivePath '../build/AidOnSandbox.xcarchive' " +
+       "-exportOptionsPlist '../build/ExportOptions.plist' " +
+       "-exportPath '../build'")
+    
+    pilot(
+      app_identifier: ENV["APP_ID"],
+      ipa: "../build/App.ipa",
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+  end
+
+  desc "Push a new release build to the App Store"
+  lane :release do
+    build_app(workspace: "CodoughUIKitSample.xcworkspace", scheme: "CodoughUIKitSample")
+    upload_to_app_store(skip_metadata: true, skip_screenshots: true)
+  end
+
+end

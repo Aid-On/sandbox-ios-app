@@ -1,0 +1,37 @@
+# SwiftFormat Configuration
+
+# Enabled rules
+--enable isEmpty
+--enable redundantNilInit
+--enable redundantLet
+--enable redundantPattern
+--enable redundantGet
+--enable redundantParens
+--enable redundantVoidReturnType
+--enable unusedArguments
+--enable trailingClosures
+--enable preferKeyPath
+
+# Disabled rules
+--disable trailingCommas
+--disable wrapMultilineStatementBraces
+
+# Formatting options
+--indent 4
+--tabwidth 4
+--maxwidth 120
+--linebreaks lf
+--semicolons never
+--trimwhitespace always
+--insertlines true
+--removelines true
+
+# Swift version
+--swiftversion 5.10
+
+# Exclude paths
+--exclude .build
+--exclude .mint
+--exclude Pods
+--exclude vendor
+--exclude DerivedData

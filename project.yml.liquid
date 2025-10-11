@@ -1,0 +1,144 @@
+{% case MATCH_OPERATION_TYPE %}
+  {% when "development" %}
+     {% assign CODE_SIGN_IDENTITY = "iPhone Developer" %}
+     {% assign MATCH_CERTIFICATION_TYPE = "Development" %}
+  {% when "appstore" %}
+     {% assign CODE_SIGN_IDENTITY = "iPhone Distribution" %}
+     {% assign MATCH_CERTIFICATION_TYPE = "AppStore" %}
+  {% when "adhoc" %}
+     {% assign CODE_SIGN_IDENTITY = "iPhone Distribution" %}
+     {% assign MATCH_CERTIFICATION_TYPE = "AdHoc" %}
+  {% when "enterprise" %}
+     {% assign CODE_SIGN_IDENTITY = "iPhone Distribution" %}
+     {% assign MATCH_CERTIFICATION_TYPE = "Enterprise" %}
+{% endcase %}
+name: {{ APP_NAME }}
+attributes:
+  LastUpgradeCheck: 1530
+  ORGANIZATIONNAME: {{ XCODE_ORGANIZATION_NAME}}
+options:
+  bundleIdPrefix: {{ APP_ID }}
+  deploymentTarget:
+    iOS: {{ XCODE_DEPLOYMENT_TARGET }}
+configs:
+  {{ XCODE_ENVIRONMENT_NAME }} Debug: debug
+  {{ XCODE_ENVIRONMENT_NAME }} Release: release
+schemes:
+  App {{ XCODE_ENVIRONMENT_NAME }}:
+    build:
+      targets:
+        App: all
+    run:
+      config: {{ XCODE_ENVIRONMENT_NAME }} Debug
+    test:
+      config: {{ XCODE_ENVIRONMENT_NAME }} Debug
+      gatherCoverageData: true
+      targets:
+        - name: AppTests
+          parallelizable: true
+          randomExecutionOrder: true
+        - name: AppUITests
+          parallelizable: true
+          randomExecutionOrder: true
+    profile:
+      config: {{ XCODE_ENVIRONMENT_NAME }} Release
+    analyze:
+      config: {{ XCODE_ENVIRONMENT_NAME }} Debug
+    archive:
+      config: {{ XCODE_ENVIRONMENT_NAME }} Release
+      revealArchiveInOrganizer: false
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: {{ XCODE_DEPLOYMENT_TARGET }}
+    TARGETED_DEVICE_FAMILY: 1,2
+    SWIFT_VERSION: 5.10
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+settingGroups:
+  appBaseSettings:
+    DEVELOPMENT_TEAM: {{ APPLE_TEAM_ID }}
+targets:
+  App:
+    type: application
+    platform: iOS
+    deploymentTarget: {{ XCODE_DEPLOYMENT_TARGET }}
+    attributes:
+      ProvisioningStyle: Manual
+    sources:
+      - path: Sources
+        name: App
+        excludes:
+          - FirebaseOptions
+    settings:
+      groups:
+        - appBaseSettings
+      base:
+        {% comment %} CODE_SIGN_ENTITLEMENTS:  Sources/App.entitlements {% endcomment %}
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+        MARKETING_VERSION: 1.0
+        CURRENT_PROJECT_VERSION: 46
+        XCODE_ENVIRONMENT_NAME: {{ XCODE_ENVIRONMENT_NAME }}
+        OTHER_LDFLAGS:
+          - $(inherited)
+          - $(OTHER_LDFLAGS)
+          - -ObjC
+      configs:
+        {{ XCODE_ENVIRONMENT_NAME }} Debug: &develop_config
+          API_HOST: xxx
+          ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+          BUNDLE_DISPLAY_NAME: {{ APP_DISPLAY_NAME }}
+          PRODUCT_BUNDLE_IDENTIFIER: {{ APP_ID }}
+          PROVISIONING_PROFILE_SPECIFIER: match {{ MATCH_CERTIFICATION_TYPE }} {{ APP_ID }}
+          CODE_SIGN_IDENTITY: {{ CODE_SIGN_IDENTITY }}
+        {{ XCODE_ENVIRONMENT_NAME }} Release: *develop_config
+
+    info:
+      path: "./Sources/Info.plist"
+      properties:
+        API_BASE_PATH: $(API_BASE_PATH)
+        WEB_BASE_PATH: $(WEB_BASE_PATH)
+        ENVIRONMENT_NAME: $(XCODE_ENVIRONMENT_NAME)
+        STRIPE_API_KEY: $(STRIPE_API_KEY)
+        CFBundleDisplayName: {{ APP_DISPLAY_NAME }}
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundlePackageType: $(PRODUCT_BUNDLE_PACKAGE_TYPE)
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: Firebase Auth URL Scheme
+            CFBundleURLSchemes:
+              - "$(FIREBASE_CUSTOM_URL_SCHEME)"
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIRequiredDeviceCapabilities:
+          - arm64
+        {% comment %} LSApplicationQueriesSchemes:
+          - otherappurlscheme {% endcomment %}
+        LSRequiresIPhoneOS: true
+        SMAuthorizedClients:
+          - ""
+  AppTests:
+    type:  bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    scheme: {}
+    dependencies:
+      - target: App
+    settings:
+      CLANG_ENABLE_MODULES: YES
+      DEVELOPMENT_TEAM: {{ APPLE_TEAM_ID }}
+  AppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: App
+    settings:
+      CLANG_ENABLE_MODULES: YES
+      DEVELOPMENT_TEAM: {{ APPLE_TEAM_ID }}

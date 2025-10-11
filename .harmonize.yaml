@@ -1,0 +1,17 @@
+# Harmonize Configuration
+# This file is required for Harmonize to correctly detect the project root
+
+# Project settings
+project_root: .
+source_directories:
+  - Sources
+  - Tests
+
+# Rules configuration
+rules:
+  architecture:
+    enabled: true
+  naming:
+    enabled: true
+  structure:
+    enabled: true
