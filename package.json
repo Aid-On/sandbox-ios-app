@@ -10,6 +10,6 @@
   "devDependencies": {},
   "dependencies": {
     "dotenv": "^8.2.0",
-    "liquidjs": "^9.16.1"
+    "liquidjs": "^10.27.2"
   }
 }
